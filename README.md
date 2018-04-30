@@ -1,4 +1,4 @@
-# Lappbill [![Build Status](https://travis-ci.com/Jylhis/Lappbill.svg?token=WMq8GV2SFxTMEmE7xpWe&branch=master)](https://travis-ci.com/Jylhis/Lappbill)
+# Lappbill [![Build Status](https://travis-ci.org/Jylhis/Lappbill.svg?branch=master)](https://travis-ci.org/Jylhis/Lappbill)
 Lisenssi: [BSD-2-Clause](LICENSE)
 
 Simppeli ohjelma tilisiirtolomakkeiden tekemiseen.
