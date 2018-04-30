@@ -49,6 +49,18 @@ public:
     alvAndYtunnus(&painter);
     bottomPart(&painter);
     fillBottom(&painter);
+
+    QStringList prices = QString::number(totalPrice).split(".");
+        QString barcodeEuro = prices.first().rightJustified(6, '0');
+        QString barcodeCent = prices.last().rightJustified(2, '0');
+        QString barcodeIBAN = Company.Iban.trimmed().remove(0, 2).replace(" ", "");
+        QString barcodeREF = Reference_Number.rightJustified(20, '0');
+        QString barcodeDueDate = Due_Date;//.toString("yyMMdd");
+
+        // FIXME: nollat tulostuu 16
+         printBarcode('4' + barcodeIBAN + barcodeEuro + barcodeCent + '0' + '0' +
+                         '0' + barcodeREF + barcodeDueDate,
+                    &painter);
   }
 
   QString GenerateReferenceNumber(quint64 invoiceNumber) {
@@ -324,6 +336,72 @@ private:
                             QStaticText(Company.AlvText));
     painter->drawStaticText(1000, BOTTOM_EDGE - lineHeight * 10.2,
                             QStaticText("Ly Tunnus: " + Company.Y_tunnus));
+  }
+
+#define CODE128_C_START 105
+#define CODE128_STOP 106
+
+  int codeToChar(int code) { return code + 105; }
+
+  int charToCode(int ch) { return ch - 32; }
+
+  int calculateCheckCharacter(QString code) {
+    QByteArray encapBarcode(code.toUtf8()); // Convert code to utf8
+
+    // Calculate check character
+    long long sum =
+        CODE128_C_START; // The sum starts with the B Code start character value
+    int weight = 1;      // Initial weight is 1
+
+    foreach (char ch, encapBarcode) {
+      int code_char = charToCode((int)ch); // Calculate character code
+      sum += code_char * weight;           // add weighted code to sum
+      weight++;                            // increment weight
+    }
+
+    int remain = sum % 103; // The check character is the modulo 103 of the sum
+
+    // Calculate the font integer from the code integer
+    if (remain >= 95)
+      remain += 105;
+    else
+      remain += 32;
+
+    return remain;
+  }
+
+  QString encodeBarcode(QString code) {
+    QString encoded;
+
+    encoded.prepend(
+        QChar(codeToChar(CODE128_C_START))); // Start set with B Code 104
+    encoded.append(code);
+    encoded.append(QChar(calculateCheckCharacter(code)));
+    encoded.append(
+        QChar(codeToChar(CODE128_STOP))); // End set with Stop Code 106
+
+    return encoded;
+  }
+
+  inline void printBarcode(QString text, QPainter *painter) {
+    double MmToDot = 8;
+
+    QRect barcodeRect =
+        QRect(5 * MmToDot, 10 * MmToDot, 67.5 * MmToDot, 10 * MmToDot);
+    QRect barcodeTextRect =
+        QRect(5 * MmToDot, 20.5 * MmToDot, 67.5 * MmToDot, 5 * MmToDot);
+
+    QFont barcodefont = QFont("Code 128", 25, QFont::Normal);
+    barcodefont.setLetterSpacing(QFont::AbsoluteSpacing, 0.0);
+    painter->setFont(barcodefont);
+
+    QString arr = encodeBarcode(text);
+    // painter->drawText(barcodeRect, Qt::AlignCenter, arr);
+    painter->drawStaticText(0, BOTTOM_EDGE + 100, QStaticText(arr));
+
+
+    // painter->setFont(QFont("PT Sans", 10));
+    // painter->drawText(barcodeTextRect, Qt::AlignCenter, text);
   }
 
   inline void itemList(QPainter *painter) {
