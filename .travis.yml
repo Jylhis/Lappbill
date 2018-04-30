@@ -1,0 +1,37 @@
+sudo: required
+language: cpp
+
+compiler:
+- clang
+
+os:
+- osx
+- linux
+
+before_install:
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo add-apt-repository --yes ppa:ubuntu-sdk-team/ppa; fi
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then  sudo add-apt-repository --yes ppa:beineri/opt-qt594-trusty; fi
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then  sudo apt-get update -qq; fi
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then  sudo apt-get install qt59-meta-full g++; fi
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then  QT_ENV_SCRIPT=$(find /opt -name 'qt*-env.sh'); fi
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then  source $QT_ENV_SCRIPT; fi
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then  brew install qt@5.5; fi
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then  export PATH="$(brew --prefix qt@5.5)/bin:$PATH"; fi
+
+script:
+- mkdir build
+- cd build
+- qmake ../Lappbill.pro -config release
+- make
+
+#deploy:
+#  skip_cleanup: true
+#  file_glob: true
+#  provider: releases
+#  api_key:
+#    secure: qtq8gV+G5BkA4GhlGLquifv0UIV8lxiF/RpL/olQKLFg6PB/sju5p2+8K3oQm2FYhUsNPQrWwxvdDsZ3Q9BdPmlljZu2zDnt/m5IXN0kVeYOM8i+c0Ud8S91xPacTwAm3ugcY3J64POM/aDs91Jt4Ti8mjHmfdUJxcMIDioox+Zb2bXyiwOxqJXsKi9Vn1Z56Ibyg/eQU3gD0Uv603YpE+5FVMNlE7qB0Ts31sv5wb5u6Fs7J/qruYgT6y9pJjKKFZX7x7PlSwOiKwCzVbrC/7HUUIyd8fhvA39k3F459K0ix5LL79CwyMACDIkaZU36O6o/Od1BekTv7C8BcBZIZu2lyHeZfuRZR7p0z1ufk8CJUKm/XZtNRIckhem5VFnM7lLq93TxuA2oDOhqQTqpHwP4WStPqERGxEfHrOkl2yyRaYiLgOtFKjyIfm7MCELkc4uZ7AoUsE9nmzOAReOYatIH3tdbChoh+itcGy4HZ2SnwEmqwe8d90rU5ui6/DFrDp8n2jMLYq83SsqO+Jo2VR3YDg5WrkzMLhH7zfHGTLcTjtJyyaXItaVBiZ9jcrCIxuli8+jz8hbGdtXzXoJt+B6QzHoIYIpIh/bmsZpqZwTvwVdGd7xJtM4GOG3OMp9tDloD952uT5Mr/UvmCbubY9skXKG+y7qMF/7BNEfsl+I=
+#  file: build/*
+#  on:
+#    repo: Jylhis/Lappbill
+#    branch: master
+#    tags: true
