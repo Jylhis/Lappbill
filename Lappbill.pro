@@ -37,3 +37,11 @@ DISTFILES += \
     invoice.css \
     new.html \
     README.md
+
+isEmpty(PREFIX) {
+    PREFIX = /usr/local
+}
+
+# install the binary
+target.path = $$PREFIX/bin
+INSTALLS += target
